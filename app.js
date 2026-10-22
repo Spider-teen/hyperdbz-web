@@ -94,7 +94,7 @@ const resume=()=>window.__ikemenResumeAudio?.();window.addEventListener('pointer
 $('start').addEventListener('click',()=>start(false));$('quick').addEventListener('click',()=>start(true));
 $('pick-game').addEventListener('click',()=>$('zip-input').click());$('import').addEventListener('click',()=>$('zip-input').click());$('folder').addEventListener('click',()=>$('folder-input').click());
 $('zip-input').addEventListener('change',e=>importFiles(e.target.files,false));$('folder-input').addEventListener('change',e=>importFiles(e.target.files,true));
-$('clear-import').addEventListener('click',async()=>{selected=null;try{await dbRequest('readwrite',s=>s.delete('game'));}catch{}$('import-info').textContent='Using the hosted web edition.';availability();});
+$('clear-import').addEventListener('click',async()=>{selected=null;try{await dbRequest('readwrite',s=>s.delete('game'));}catch{}$('import-info').textContent='Selected ZIP forgotten. Choose your complete ZIP to play.';availability();});
 for(const id of ['back','retry'])$(id).addEventListener('click',()=>location.reload());
 $('fullscreen').addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('game').requestFullscreen();}catch{$('runtime-state').textContent='Fullscreen is unavailable; the game can still run in this window.';}});
 document.addEventListener('dragover',e=>{if(!running)e.preventDefault();});document.addEventListener('drop',e=>{if(!running){e.preventDefault();importFiles(e.dataTransfer.files,false);}});
