@@ -39,14 +39,14 @@ function clean(name){name=name.replaceAll('\\','/');return name.startsWith('/')|
 function findRoot(names){
  const all=names.map(clean).filter(Boolean), lower=new Set(all.map(n=>n.toLowerCase()));
  const roots=all.filter(n=>/(?:^|\/)data\/system\.def$/i.test(n)).map(n=>n.slice(0,-'data/system.def'.length)).filter(p=>lower.has((p+'data/select.def').toLowerCase())&&lower.has((p+'chars/GokuZ2/GokuZ2.def').toLowerCase()));
- if(roots.length!==1)throw new Error('Choose a complete Hyper DBZ ZIP, all four ZIP parts together, or the extracted game folder. The selection needs data/system.def, data/select.def, and GokuZ2.');
+ if(roots.length!==1)throw new Error('Choose your complete Hyper DBZ ZIP or its extracted game folder. It must contain the full game, including data/system.def and chars/GokuZ2.');
  const prefix=roots[0];return name=>{name=clean(name);if(!name.toLowerCase().startsWith(prefix.toLowerCase()))return null;name=name.slice(prefix.length);return allowed.has(name.split('/')[0].toLowerCase())&&!/\.(exe|dll|psd|bak|log)$/i.test(name)?name:null;};
 }
 async function dbRequest(mode,fn){
  const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('hyperdbz-web-imports',1);r.onupgradeneeded=()=>r.result.createObjectStore('files');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
  try{return await new Promise((resolve,reject)=>{const tx=db.transaction('files',mode),r=fn(tx.objectStore('files'));tx.oncomplete=()=>resolve(r.result);tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('Browser storage is full'));});}finally{db.close();}
 }
-function availability(){const ready=Boolean(selected||manifest?.bundles?.length);$('start').disabled=$('quick').disabled=!ready;$('clear-import').hidden=!selected;$('availability').textContent=selected?'Your original game files are ready.':ready?'Full hosted roster · smaller audio · loads on demand':'Choose your Hyper DBZ ZIP files to begin.';}
+function availability(){const ready=Boolean(selected||manifest?.bundles?.length);$('start').disabled=$('quick').disabled=!ready;$('clear-import').hidden=!selected;$('availability').textContent=selected?(selected.kind==='zips'&&selected.files.length===1?'Ready: '+selected.files[0].name:'Your original game files are ready.'):ready?'Full hosted roster · smaller audio · loads on demand':'Choose your complete Hyper DBZ ZIP to begin.';}
 async function importFiles(files,folder){
  if(!files.length)return;$('import-info').textContent='Checking your files…';
  try{
@@ -56,7 +56,7 @@ async function importFiles(files,folder){
   if(folder)names=chosen.map(f=>f.name);
   else{
    const parts=chosen.map(f=>/part[_ -]*(\d+)[_ -]*of[_ -]*(\d+)/i.exec(f.name)).filter(Boolean);
-   if(parts.length){const total=Number(parts[0][2]),present=new Set(parts.map(p=>Number(p[1]))),missing=Array.from({length:total},(_,i)=>i+1).filter(i=>!present.has(i));if(missing.length)throw new Error('Select all '+total+' ZIP parts together. Missing: '+missing.join(', ')+'. No merging is needed.');}
+   if(parts.length){const total=Number(parts[0][2]),present=new Set(parts.map(p=>Number(p[1]))),missing=Array.from({length:total},(_,i)=>i+1).filter(i=>!present.has(i));if(missing.length)throw new Error('This looks like a ZIP part. Choose your merged complete Hyper DBZ ZIP.');}
    names=(await Promise.all(chosen.map(f=>listZipIndex(f.blob)))).flatMap(i=>i.entries.map(e=>e.name));
   }
   findRoot(names);selected={kind:folder?'folder':'zips',files:chosen};availability();$('import-info').textContent='Files ready. Remembering them for your next visit…';
@@ -76,7 +76,7 @@ async function start(quick){
  if(running)return;running=true;const began=Date.now();$('launcher').hidden=true;$('game').hidden=false;$('loading').hidden=false;document.body.classList.add('playing');
  try{
   const probe=document.createElement('canvas').getContext('webgl2');if(!probe)throw new Error('WebGL 2 is unavailable in this browser. The game needs WebGL 2 and WebAssembly.');probe.getExtension('WEBGL_lose_context')?.loseContext();
-  status('Loading browser engine support…');await mountZip('base.zip',mount);await mountGame();await mkdir(mount+'/save');
+  status('Loading browser engine support…');await mountZip('base.zip',mount);await mountGame();const roster=await readText(mount+'/data/select.def');await writeText(mount+'/data/select.def',roster.replace(/^training(?:[/\\][^,\r\n]+)?\s*,[^\r\n]*/gmi,'EMPTY ; optional training dummy absent from original archive'));await mkdir(mount+'/save');
   try{await readText(mount+'/save/browser-config.ini');}catch(e){if(e.code!=='ENOENT')throw e;const r=await fetch('default-config.ini');if(!r.ok)throw new Error('Browser configuration is missing');await writeText(mount+'/save/browser-config.ini',await r.text());}
   if($('skip-intro').checked){const system=await readText(mount+'/data/system.def');await writeText(mount+'/data/system.def',system.replace(/^(\s*(?:logo|intro)\.storyboard\s*=).*$/gmi,'$1'));}
   process.chdir(mount);status('Loading fighting engine…');
@@ -92,7 +92,7 @@ window.addEventListener('hdbz-file',e=>{const char=/\/chars\/([^/]+)/i.exec(e.de
 window.addEventListener('error',e=>{if(running)fail(e.error||new Error(e.message));});window.addEventListener('unhandledrejection',e=>{if(running)fail(e.reason);});
 const resume=()=>window.__ikemenResumeAudio?.();window.addEventListener('pointerdown',resume);window.addEventListener('keydown',resume);
 $('start').addEventListener('click',()=>start(false));$('quick').addEventListener('click',()=>start(true));
-$('import').addEventListener('click',()=>$('zip-input').click());$('folder').addEventListener('click',()=>$('folder-input').click());
+$('pick-game').addEventListener('click',()=>$('zip-input').click());$('import').addEventListener('click',()=>$('zip-input').click());$('folder').addEventListener('click',()=>$('folder-input').click());
 $('zip-input').addEventListener('change',e=>importFiles(e.target.files,false));$('folder-input').addEventListener('change',e=>importFiles(e.target.files,true));
 $('clear-import').addEventListener('click',async()=>{selected=null;try{await dbRequest('readwrite',s=>s.delete('game'));}catch{}$('import-info').textContent='Using the hosted web edition.';availability();});
 for(const id of ['back','retry'])$(id).addEventListener('click',()=>location.reload());

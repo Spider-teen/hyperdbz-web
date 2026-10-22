@@ -66,6 +66,10 @@ def package_group(item, dest):
             for source_path, original, relative in entries:
                 if source_path not in sources: sources[source_path] = zipfile.ZipFile(source_path)
                 data = sources[source_path].read(original)
+                if relative.lower() == 'data/select.def':
+                    text = data.decode('utf-8', 'replace')
+                    text = re.sub(r'(?mi)^training(?:[/\\][^,\r\n]+)?\s*,[^\r\n]*', 'EMPTY ; optional training dummy absent from original archive', text)
+                    data = text.encode('utf-8')
                 if relative.lower().endswith('.snd'):
                     data = compact_snd(data)
                 elif relative.lower().endswith('.mp3'):

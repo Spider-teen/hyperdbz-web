@@ -4,14 +4,17 @@ An **experimental browser port** of Hyper Dragon Ball Z 6.0c (Wicked Ambition)
 using the actual game files and IKEMEN GO's WebAssembly backend.
 Players do not need Linux, Winlator, or a Windows executable.
 
-Choose **Start game** for the original menu, or **Quick fight** for a match
-against the computer. The hosted game includes the full roster and stages
-with smaller audio. Characters, stages and tracks are read on demand.
+Choose **Choose complete ZIP**, select your complete Hyper DBZ ZIP,
+then choose **Start game** for the original menu or **Quick fight**
+for a match against the computer. The public site contains the launcher and
+browser engine. The game assets are supplied locally by the player.
 
-For original audio, select all four `HyperDBZ_6.0c_Part_N_of_4.zip` files
-together with **Choose ZIP files**. No merging is needed. A complete ZIP
-and an extracted game folder also work. Nothing is uploaded; imported
-files are remembered in IndexedDB when space permits.
+The optional compact hosted asset build is prepared but has not been
+published; publication of the full game assets needs explicit approval.
+
+The complete ZIP is read directly, without extraction or another merge.
+Nothing is uploaded. The browser remembers it in IndexedDB when space
+permits; an extracted game folder also works.
 
 | Action | Keys |
 | --- | --- |
@@ -43,7 +46,7 @@ The checked-in engine and `wasm_exec.js` are a matching prebuilt pair from
 [mathmati/fiiight](https://github.com/mathmati/fiiight), revision
 `9e4b23c1d49638a631d62bca279137704843edcb`.
 
-To rebuild content from the four original ZIPs (Python, NumPy, SciPy and
+To rebuild content from the complete ZIP or the four original ZIPs (Python, NumPy, SciPy and
 FFmpeg required):
 
 ```sh
