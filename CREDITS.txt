@@ -1,0 +1,21 @@
+Hyper Dragon Ball Z 6.0c — Wicked Ambition
+Original game by Team Z2. Dragon Ball by Akira Toriyama.
+Read TEAM-Z2-README.txt for the creators' message and conditions.
+This is a free, noncommercial fan project. Support official releases.
+
+Engine: IKEMEN GO (MIT), https://github.com/ikemen-engine/Ikemen-GO
+Browser backend / filesystem: mathmati/fiiight (MIT).
+https://github.com/mathmati/fiiight
+Source revision: 9e4b23c1d49638a631d62bca279137704843edcb
+See LICENSE and ENGINE-LICENSE.txt for license and asset notices.
+
+Launcher / multi-ZIP import / compact archives:
+https://github.com/Spider-teen/hyperdbz-web
+
+Hosted audio: mono 16 kHz / 8-bit PCM WAV samples, 64 kbps MP3 music.
+Character scripts and sprite files are preserved. Original ZIP imports use
+the user's unmodified files and original audio. Imported files stay in the
+browser and are remembered locally when storage permits. No browser netplay.
+
+Experimental build. A playable match has not yet been verified; the remote
+test browser has WebGL 2 disabled. Requires WebGL 2 and WebAssembly.
